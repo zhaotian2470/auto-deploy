@@ -33,7 +33,7 @@ nodeClusterMode=config.getint("default", "clusterMode")
 
 
 def deployProgram():
-    
+
     deployTimeout = lib.shUtil.shTimeout
     localProjectPath = os.path.join('~', os.path.basename(os.path.splitext(nodeRepoPath)[0]))
     localStartFile = os.path.join(localProjectPath, nodeFile)
@@ -45,13 +45,13 @@ Please make sure the following things before deploy program:
 * remove node programs
 * remove pm2 data
 All commands - 1:  mkdir ~/saveData; cp -r %s/config ~/saveData;
-             - 2:  pm2 delete all; rm -rf %s; rm -rf ~/.pm2; 
+             - 2:  pm2 delete all; rm -rf %s; rm -rf ~/.pm2;
 input 'y' to continue: """ %(localProjectPath, localProjectPath)
     inputRes = raw_input(inputPrompt)
     if inputRes != 'y':
         return
-    
-    print("\n********start deploy program: %s" %(nodeRepoPath))    
+
+    print("\n********start deploy program: %s" %(nodeRepoPath))
     ssh = pxssh.pxssh()
     ssh.logfile_read = sys.stdout
     ssh.login(nodeHost, nodeUserName, nodeUserPassword, port = nodePort)
@@ -64,6 +64,9 @@ input 'y' to continue: """ %(localProjectPath, localProjectPath)
     lib.nodejsUtil.installNodejs(ssh)
     lib.nodejsUtil.installPm2(ssh, nodeUserName, 655350)
     lib.shUtil.leaveUser(ssh)
+
+    # install pm2 log rotate
+    lib.nodejsUtil.installPm2LogRotate(ssh)
 
     # install program
     lib.shUtil.checkoutCodeDirectly(nodeHost, nodePort, nodeUserName, nodeUserPassword, nodeRepoPath)
@@ -81,8 +84,8 @@ Todo list after restore config, and reboot host:
 * check pm2
 * check login file descriptor
 * check pm2 file descriptor
-All commands - 1: ntpq -p; pm2 list; ulimit -n; 
-             - 2: cat /proc/`cat ~/.pm2/pm2.pid`/limits; cat /proc/`cat ~/.pm2/pids/index-0.pid`/limits; 
+All commands - 1: ntpq -p; pm2 list; pm2 show pm2-logrotate; ulimit -n;
+             - 2: cat /proc/`cat ~/.pm2/pm2.pid`/limits; cat /proc/`cat ~/.pm2/pids/index-1.pid`/limits;
 """
     print(todoList)
 

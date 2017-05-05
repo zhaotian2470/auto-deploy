@@ -17,7 +17,7 @@ nodejsTimeout = shUtil.shTimeout
 
 
 def installNodejs(sh):
-    
+
     global nodejsTimeout
 
     shUtil.flushShOutput(sh)
@@ -36,11 +36,12 @@ def installPm2(sh, pm2User, fileNoLimit):
     global nodejsTimeout
 
     shUtil.flushShOutput(sh)
-    
-    print("\n********begin install pm2")    
+
+    print("\n********begin install pm2")
 
     sh.sendline("npm install pm2 -g")
     sh.prompt(nodejsTimeout)
+
     sh.sendline("env PATH=$PATH:/usr/bin pm2 startup centos -u %s --hp ~%s" %(pm2User, pm2User))
     sh.prompt(nodejsTimeout)
 
@@ -51,26 +52,36 @@ def installPm2(sh, pm2User, fileNoLimit):
 
     print("\n********end install pm2")
 
+def installPm2LogRotate(sh):
+    global nodejsTimeout
+
+    shUtil.flushShOutput(sh)
+
+    print("\n********begin install log rotate")
+    sh.sendline("pm2 install pm2-logrotate")
+    sh.prompt(nodejsTimeout)
+    sh.sendline("pm2 set pm2-logrotate:max_size 1G")
+    sh.prompt()
+    sh.sendline("pm2 set pm2-logrotate:retain 30")
+    sh.prompt()
+    sh.sendline("pm2 set pm2-logrotate:compress true")
+    sh.prompt()
+    print("\n********end install log rotate")
+
 def installLocalModule(sh, localPath):
     global nodejsTimeout
 
     shUtil.flushShOutput(sh)
 
-    print("\n********begin install local %s" %(localPath))    
+    print("\n********begin install local %s" %(localPath))
     sh.sendline("cd %s" %(os.path.dirname(localPath)))
     sh.prompt()
     sh.sendline("npm install")
     sh.prompt(nodejsTimeout)
-    sh.sendline("pm2 install pm2-logrotate")
-    sh.prompt(nodejsTimeout)
-    sh.sendline("pm2 set pm2-logrotate:max_size 500M")
-    sh.prompt(nodejsTimeout)
-    sh.sendline("pm2 set pm2-logrotate:retain 10")
-    sh.prompt(nodejsTimeout)
     print("\n********end install local %s" %(localPath))
 
 def startLocalProgram(sh, localPath, clusterMode):
-    
+
     shUtil.flushShOutput(sh)
 
     instanceNumber = "";
@@ -83,7 +94,7 @@ def startLocalProgram(sh, localPath, clusterMode):
     sh.sendline("cd %s" %(os.path.dirname(localPath)))
     sh.prompt()
 
-    sh.sendline("pm2 start %s %s --no-vizion" %(os.path.basename(localPath), instanceNumber))
+    sh.sendline("pm2 start %s %s --no-vizion --merge-logs" %(os.path.basename(localPath), instanceNumber))
     sh.prompt()
 
     sh.sendline("sleep 5")
