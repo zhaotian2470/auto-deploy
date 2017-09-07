@@ -8,7 +8,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import sys
-import pxssh
+from pexpect import pxssh
 import ConfigParser
 import lib.shUtil
 
